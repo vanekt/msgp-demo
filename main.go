@@ -1,8 +1,10 @@
 package main
 
 import (
+	//"msgp-demo/json"
+	"reflect"
 	"fmt"
-	"msgp-demo/json"
+	"errors"
 )
 
 //go:generate msgp
@@ -14,20 +16,35 @@ type Foo struct {
 
 func main() {
 	foo1 := Foo{ "aaa", 0.15 }
-	foo2 := Foo{}
-
 	data, _ := foo1.MarshalMsg(nil)
-	data, _ = foo2.UnmarshalMsg(data)
 
-	fmt.Printf("foo1: %v\n", foo1)
-	fmt.Printf("foo2: %v\n", foo2)
+	var x interface{}
+	x = []interface{}{"string", data}
 
-	boo1 := json.Boo{ "bbb", 0.25 }
-	boo2 := json.Boo{}
+	data2, err := FetchSliceData(x)
+	if err != nil {
+		panic(err.Error())
+	}
 
-	data2, _ := boo1.MarshalJSON()
-	_ = boo2.UnmarshalJSON(data2)
+	foo2 := Foo{}
+	foo2.UnmarshalMsg(data2)
+	fmt.Println(foo2)
+}
 
-	fmt.Printf("boo1: %v\n", boo1)
-	fmt.Printf("boo2: %v\n", boo2)
+func FetchSliceData(x interface{}) (data []byte, err error) {
+	v := reflect.ValueOf(x)
+	if v.Kind() == reflect.Slice && v.Len() == 2 {
+		byteSlice := v.Index(1).Elem()
+
+		data = make([]byte, byteSlice.Len())
+		for i := 0; i < byteSlice.Len(); i++ {
+			data[i] = byte(byteSlice.Index(i).Uint())
+		}
+
+		return
+	}
+
+	err = errors.New("Wrong data format")
+
+	return
 }
