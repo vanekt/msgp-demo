@@ -34,12 +34,12 @@ func main() {
 func FetchSliceData(x interface{}) (data []byte, err error) {
 	v := reflect.ValueOf(x)
 	if v.Kind() == reflect.Slice && v.Len() == 2 {
-		byteSlice := v.Index(1).Elem()
+		data = v.Index(1).Elem().Bytes()
 
-		data = make([]byte, byteSlice.Len())
-		for i := 0; i < byteSlice.Len(); i++ {
-			data[i] = byte(byteSlice.Index(i).Uint())
-		}
+		//data = make([]byte, byteSlice.Len())
+		//for i := 0; i < byteSlice.Len(); i++ {
+		//	data[i] = byte(byteSlice.Index(i).Uint())
+		//}
 
 		return
 	}
